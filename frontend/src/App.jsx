@@ -14,6 +14,7 @@ export default function App() {
   const [working, setWorking] = useState('')
   const [activeNav, setActiveNav] = useState('Dashboard')
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [strategy, setStrategy] = useState('rules')
   const [demandSpikeMultiplier, setDemandSpikeMultiplier] = useState(3)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -26,6 +27,14 @@ export default function App() {
     document.documentElement.dataset.theme = theme
     window.localStorage.setItem('stockpulse-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    const profileButtons = document.querySelectorAll('.profile, .sidebar-footer')
+    if (!profileButtons.length) return undefined
+    const toggleProfile = () => setProfileOpen(value => !value)
+    profileButtons.forEach(profileButton => profileButton.addEventListener('click', toggleProfile))
+    return () => profileButtons.forEach(profileButton => profileButton.removeEventListener('click', toggleProfile))
+  }, [])
 
   const refresh = useCallback(async () => {
     try {
@@ -59,6 +68,7 @@ export default function App() {
       {activeNav === 'Activity' && <ActivityPage products={products} pricing={pricing} reorders={reorders} />}
       {activeNav === 'Settings' && <SettingsPage strategy={strategy} demandSpikeMultiplier={demandSpikeMultiplier} loadStrategy={async () => { try { const result = await getStrategy(); setStrategy(result.strategy) } catch (cause) { setError(cause.message) } }} setStrategy={async value => { try { const result = await changeStrategy(value); setStrategy(result.strategy) } catch (cause) { setError(cause.message) } }} />}
     </main>
+    {profileOpen && <div className="profile-menu" role="menu"><strong>Merchandising</strong><small>ShopStream workspace</small><button role="menuitem" onClick={() => { setActiveNav('Settings'); setProfileOpen(false) }}>Open settings</button></div>}
     <ChatWidget />
   </div>
 }

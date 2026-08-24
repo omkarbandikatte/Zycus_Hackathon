@@ -23,7 +23,8 @@ body { background: #f7f8fc; }
 .nav-item.active { box-shadow: inset 3px 0 #6366f1; }
 .nav-item span { color: #818cf8; font: 10px 'DM Mono', monospace; }
 .nav-count { background: #272c63; padding: 3px 6px; border-radius: 10px; }
-.sidebar-footer { margin-top: auto; display: flex; gap: 9px; align-items: center; border-top: 1px solid #273244; padding: 18px 8px 0; font-size: 11px; }
+.sidebar-footer { margin-top: auto; display: flex; gap: 9px; align-items: center; border-top: 1px solid #273244; padding: 18px 8px 0; font-size: 11px; cursor: pointer; }
+.sidebar-footer:hover { color: #fff; }
 .sidebar-footer strong, .sidebar-footer small { display: block; } .sidebar-footer small { color: #64748b; margin-top: 3px; font: 10px 'DM Mono', monospace; } .avatar { width: 27px; height: 27px; display: grid; place-items: center; background: #3730a3; color: white; border-radius: 50%; } .dots { margin-left: auto; color: #64748b; }
 .dashboard { flex: 1; min-width: 0; padding: 34px 42px 60px; max-width: 1480px; margin: auto; }
 .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; } .topbar h1 { font: 600 29px 'DM Sans', sans-serif; letter-spacing: -.04em; margin: 8px 0 5px; line-height: 1.2; } .topbar h1 em { color: #6366f1; font-style: normal; } .topbar .subhead { color: #6b7280; font-size: 13px; margin: 0; } .topbar .subhead strong { color: #111827; }
@@ -223,6 +224,12 @@ body { background: #f7f8fc; }
 }
 
 .chat-widget { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.profile-menu { position: fixed; z-index: 40; top: 70px; right: 42px; width: 210px; padding: 14px; background: #fff; border: 1px solid #e6eaf1; border-radius: 9px; box-shadow: 0 16px 36px rgba(15, 23, 42, .18); }
+.profile-menu strong, .profile-menu small { display: block; }
+.profile-menu strong { color: #111827; font-size: 12px; }
+.profile-menu small { margin-top: 4px; color: #94a3b8; font: 9px 'DM Mono', monospace; }
+.profile-menu button { width: 100%; margin-top: 14px; padding: 9px 10px; border: 1px solid #dbe1eb; border-radius: 6px; background: #f8fafc; color: #4f46e5; text-align: left; font-size: 11px; }
+.profile-menu button:hover { background: #eef2ff; }
 .notification-wrap { position: relative; }
 .icon-button.open { color: var(--accent); background: var(--accent-soft); border-radius: 7px; }
 .notification-popover { position: absolute; z-index: 20; top: calc(100% + 12px); right: -8px; width: 340px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 16px 36px rgba(15, 23, 42, .18); }
