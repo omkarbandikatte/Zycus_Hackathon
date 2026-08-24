@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: stockpulse
+  datasource:
+    url: jdbc:h2:mem:stockpulse;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+
+server:
+  port: 8080
+
+stockpulse:
+  strategy: ${STOCKPULSE_STRATEGY:rules}
+  demand-spike-multiplier: 3
+
+llm:
+  provider: ${LLM_PROVIDER:ollama}
+  api-key: ${LLM_API_KEY:}
+  model: ${LLM_MODEL:llama3.1}
+  base-url: ${LLM_BASE_URL:http://localhost:11434}
+  backup:
+    base-url: ${LLM_BACKUP_BASE_URL:}
+    api-key: ${LLM_BACKUP_API_KEY:}
+    model: ${LLM_BACKUP_MODEL:}
+    path: ${LLM_BACKUP_PATH:/chat/completions}
+    product: ${LLM_BACKUP_PRODUCT:}
+    flowname: ${LLM_BACKUP_FLOWNAME:}
+    bundlename: ${LLM_BACKUP_BUNDLENAME:}
+    user-id: ${LLM_BACKUP_USER_ID:}
+    tenant-id: ${LLM_BACKUP_TENANT_ID:}
+    execution-mode: ${LLM_BACKUP_EXECUTION_MODE:manual}
+
