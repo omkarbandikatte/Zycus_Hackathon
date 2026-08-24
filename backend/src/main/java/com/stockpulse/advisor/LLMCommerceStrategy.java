@@ -15,7 +15,7 @@ public class LLMCommerceStrategy implements PricingStrategy {
     public LLMCommerceStrategy(LLMGateway gateway, RuleBasedPricingStrategy fallback) { this.gateway = gateway; this.fallback = fallback; }
     public PricingRecommendation recommend(CommerceContext context) {
         try {
-            var node = mapper.readTree(extract(gateway.callLLM(prompt(context))));
+            var node = mapper.readTree(extractJson(extract(gateway.callLLM(prompt(context)))));
             var price = new BigDecimal(node.path("recommendedPrice").asText());
             var direction = ChangeDirection.valueOf(node.path("direction").asText("HOLD"));
             var confidence = node.path("confidence").asDouble();
@@ -54,7 +54,7 @@ public class LLMCommerceStrategy implements PricingStrategy {
         var markerIndex = content.indexOf(REASONING_MARKER);
         if (markerIndex < 0) throw new IllegalArgumentException("Missing JSON marker in streamed AI response");
         var reasoning = content.substring(0, markerIndex).trim();
-        var node = mapper.readTree(content.substring(markerIndex + REASONING_MARKER.length()).trim());
+        var node = mapper.readTree(extractJson(content.substring(markerIndex + REASONING_MARKER.length())));
         var price = new BigDecimal(node.path("recommendedPrice").asText());
         var direction = ChangeDirection.valueOf(node.path("direction").asText("HOLD"));
         var confidence = node.path("confidence").asDouble();
@@ -62,5 +62,37 @@ public class LLMCommerceStrategy implements PricingStrategy {
         if (price.compareTo(minimumPrice) < 0 || price.compareTo(context.product().getCurrentPrice().multiply(BigDecimal.TEN)) > 0 || !Double.isFinite(confidence) || confidence < 0 || confidence > 1 || reasoning.isBlank()) throw new IllegalArgumentException("Invalid streamed AI pricing response");
         return new PricingRecommendation(price, direction, confidence, reasoning);
     }
-    static String extract(String raw) throws Exception { var mapper = new ObjectMapper(); var root = mapper.readTree(raw); if (root.has("response")) return root.get("response").asText(); if (root.has("choices")) return root.get("choices").get(0).get("message").get("content").asText(); if (root.has("candidates")) return root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText(); return raw; }
+    static String extract(String raw) throws Exception {
+        try {
+            var root = new ObjectMapper().readTree(raw);
+            if (root.has("response")) return root.get("response").asText();
+            if (root.has("choices")) return root.get("choices").get(0).get("message").get("content").asText();
+            if (root.has("candidates")) return root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText();
+        } catch (Exception ignored) {
+            // Providers may return plain text containing a JSON object.
+        }
+        return raw;
+    }
+    static String extractJson(String raw) {
+        var start = raw.indexOf('{');
+        if (start < 0) throw new IllegalArgumentException("AI response does not contain a JSON object");
+        var depth = 0;
+        var inString = false;
+        var escaped = false;
+        for (var index = start; index < raw.length(); index++) {
+            var character = raw.charAt(index);
+            if (inString) {
+                if (escaped) escaped = false;
+                else if (character == '\\') escaped = true;
+                else if (character == '"') inString = false;
+            } else if (character == '"') {
+                inString = true;
+            } else if (character == '{') {
+                depth++;
+            } else if (character == '}' && --depth == 0) {
+                return raw.substring(start, index + 1);
+            }
+        }
+        throw new IllegalArgumentException("AI response contains incomplete JSON");
+    }
 }

@@ -10,7 +10,7 @@ public class LLMReorderStrategy implements ReorderStrategy {
     public LLMReorderStrategy(LLMGateway gateway, RuleBasedReorderStrategy fallback) { this.gateway = gateway; this.fallback = fallback; }
     public ReorderRecommendation recommend(CommerceContext context) {
         try {
-            var node = mapper.readTree(LLMCommerceStrategy.extract(gateway.callLLM(prompt(context))));
+            var node = mapper.readTree(LLMCommerceStrategy.extractJson(LLMCommerceStrategy.extract(gateway.callLLM(prompt(context)))));
             int quantity = node.path("recommendedQuantity").asInt();
             int leadTime = node.path("suggestedLeadTimeDays").asInt(7);
             double confidence = node.path("confidence").asDouble();

@@ -105,8 +105,26 @@ class LLMStrategyTest {
         assertThat(tokens).contains("Demand is elevated");
     }
 
+    @Test
+    void explanatoryTextAroundValidAiJsonDoesNotTriggerFallback() {
+        when(gateway.callLLM(org.mockito.ArgumentMatchers.anyString()))
+            .thenReturn("Here is the recommendation:\n```json\n{\"recommendedPrice\":\"21.00\",\"direction\":\"INCREASE\",\"confidence\":0.84,\"reasoning\":\"demand is elevated\"}\n```")
+            .thenReturn("I recommend replenishing for lead-time demand. {\"recommendedQuantity\":14,\"suggestedLeadTimeDays\":5,\"confidence\":0.8,\"reasoning\":\"cover expected demand\"}");
+
+        var pricing = new LLMCommerceStrategy(gateway, new RuleBasedPricingStrategy());
+        var reorder = new LLMReorderStrategy(gateway, new RuleBasedReorderStrategy());
+        var context = new CommerceContext(product, 10, TriggerReason.DEMAND_SPIKE);
+
+        assertThat(pricing.recommend(context).recommendedPrice()).isEqualByComparingTo("21.00");
+        assertThat(reorder.recommend(context).recommendedQuantity()).isEqualTo(14);
+    }
+
     private record Scenario(TriggerReason trigger, String price, String direction, double confidence,
                             int quantity, int leadTime) { }
 
     private String capturePrompt() {
-        var prompt = Argumen
+        var prompt = ArgumentCaptor.forClass(String.class);
+        verify(gateway, org.mockito.Mockito.atLeastOnce()).callLLM(prompt.capture());
+        return prompt.getAllValues().get(prompt.getAllValues().size() - 1);
+    }
+}
