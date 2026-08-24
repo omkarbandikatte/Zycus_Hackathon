@@ -21,6 +21,8 @@ stockpulse:
   demand-spike-multiplier: 3
 
 llm:
+  connect-timeout-seconds: ${LLM_CONNECT_TIMEOUT_SECONDS:10}
+  read-timeout-seconds: ${LLM_READ_TIMEOUT_SECONDS:45}
   provider: ${LLM_PROVIDER:ollama}
   api-key: ${LLM_API_KEY:}
   model: ${LLM_MODEL:llama3.1}

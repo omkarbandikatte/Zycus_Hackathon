@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 @Component
 public class LLMGateway {
     private static final Logger log = LoggerFactory.getLogger(LLMGateway.class);
-    private final RestClient http = RestClient.create();
+    private final RestClient http;
     private final HttpClient streamHttp = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private final ObjectMapper mapper = new ObjectMapper();
     @Value("${llm.provider:ollama}") private String provider;
@@ -37,6 +38,8 @@ public class LLMGateway {
     @Value("${llm.backup.user-id:}") private String backupUserId;
     @Value("${llm.backup.tenant-id:}") private String backupTenantId;
     @Value("${llm.backup.execution-mode:manual}") private String backupExecutionMode;
+    private final int streamTimeoutSeconds;
+    public LLMGateway(@Value("${llm.connect-timeout-seconds:10}") int connectTimeoutSeconds, @Value("${llm.read-timeout-seconds:45}") int readTimeoutSeconds) { var requestFactory = new SimpleClientHttpRequestFactory(); requestFactory.setConnectTimeout(Duration.ofSeconds(connectTimeoutSeconds)); requestFactory.setReadTimeout(Duration.ofSeconds(readTimeoutSeconds)); http = RestClient.builder().requestFactory(requestFactory).build(); streamTimeoutSeconds = readTimeoutSeconds; }
     public String callLLM(String prompt) {
         try {
             return callPrimary(prompt);
@@ -95,6 +98,7 @@ public class LLMGateway {
     private String streamOllama(String prompt, Consumer<String> onToken) throws Exception {
         var request = HttpRequest.newBuilder(URI.create(baseUrl + "/api/generate"))
             .header("Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(streamTimeoutSeconds))
             .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(Map.of("model", model, "prompt", prompt, "stream", true))))
             .build();
         var response = streamHttp.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -115,6 +119,7 @@ public class LLMGateway {
         var builder = HttpRequest.newBuilder(URI.create(url))
             .header("Content-Type", "application/json")
             .header("Authorization", "Bearer " + bearerKey);
+        builder.timeout(Duration.ofSeconds(streamTimeoutSeconds));
         extraHeaders.forEach(builder::header);
         var request = builder.POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(Map.of("model", modelId, "messages", List.of(Map.of("role", "user", "content", prompt)), "temperature", 0.1, "stream", true)))).build();
         var response = streamHttp.send(request, HttpResponse.BodyHandlers.ofInputStream());
@@ -136,6 +141,7 @@ public class LLMGateway {
         var url = baseUrl + "/v1beta/models/" + model + ":streamGenerateContent?alt=sse&key=" + apiKey;
         var request = HttpRequest.newBuilder(URI.create(url))
             .header("Content-Type", "application/json")
+            .timeout(Duration.ofSeconds(streamTimeoutSeconds))
             .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(Map.of("contents", List.of(Map.of("parts", List.of(Map.of("text", prompt))))))))
             .build();
         var response = streamHttp.send(request, HttpResponse.BodyHandlers.ofInputStream());

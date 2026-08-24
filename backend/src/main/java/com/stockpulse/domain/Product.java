@@ -35,6 +35,7 @@ public class Product {
     public void recordSale() { changeStock(-1); demandVelocity++; }
     public void applyPrice(BigDecimal price) { if (price == null || price.signum() <= 0) throw new IllegalArgumentException("Price must be positive"); currentPrice = price; status = stockLevel == 0 ? ProductStatus.OUT_OF_STOCK : ProductStatus.ACTIVE; }
     public void markPriceReviewPending() { if (status != ProductStatus.OUT_OF_STOCK) status = ProductStatus.PRICE_REVIEW_PENDING; }
+    public void clearPriceReviewPending() { if (stockLevel > 0 && status == ProductStatus.PRICE_REVIEW_PENDING) status = ProductStatus.ACTIVE; }
     private void refreshStatus() { status = stockLevel == 0 ? ProductStatus.OUT_OF_STOCK : status == ProductStatus.PRICE_REVIEW_PENDING ? status : ProductStatus.ACTIVE; }
     public String getId() { return id; } public String getSku() { return sku; } public String getName() { return name; } public Category getCategory() { return category; }
     public BigDecimal getCurrentPrice() { return currentPrice; } public int getStockLevel() { return stockLevel; } public int getReorderThreshold() { return reorderThreshold; }

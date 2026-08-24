@@ -64,6 +64,7 @@ body { background: #f7f8fc; }
 .suggestion-card-head { display: flex; justify-content: space-between; gap: 15px; }
 .suggestion-card-head > div { min-width: 0; }
 .suggestion-card-head small, .suggestion-card h3 { overflow-wrap: anywhere; }
+.suggestion-card-head .ai-pill { align-self: flex-start; flex: 0 0 auto; width: fit-content; max-width: 100%; height: auto; min-height: 0; white-space: nowrap; }
 .suggestion-card h3 { margin: 7px 0 3px; font-size: 16px; }
 .suggestion-card p { margin: 0; color: #94a3b8; font-size: 11px; }
 .suggestion-value { display: flex; align-items: center; gap: 18px; margin: 21px 0 13px; color: #64748b; }
@@ -93,6 +94,34 @@ body { background: #f7f8fc; }
 .stream-output { border: 1px solid #ddd6fe; background: #fafaff; border-radius: 6px; padding: 13px; margin: -7px 0 18px; }.stream-output small { color: #7c3aed; }.stream-output p { margin: 7px 0 0; color: #4b5563; font-size: 12px; line-height: 1.6; }
 .history svg { display: block; width: 100%; height: 120px; margin-top: 12px; }
 @media (max-width: 560px) { .heatmap { grid-template-columns: repeat(2, 1fr); }.heatmap-legend { flex-wrap: wrap; gap: 10px; } }
+
+/* Keep the operational chart feeling current while the API refreshes catalog data. */
+.velocity-panel .chart { position: relative; overflow: hidden; }
+.velocity-panel .panel-heading .eyebrow { display: flex; align-items: center; gap: 7px; }
+.velocity-panel .panel-heading .eyebrow::after { content: 'LIVE'; display: inline-flex; align-items: center; height: 17px; padding: 0 6px 0 5px; border: 1px solid rgba(16, 185, 129, .28); border-radius: 4px; color: #059669; background: rgba(16, 185, 129, .1); font: 9px 'DM Mono', monospace; letter-spacing: .05em; animation: live-pulse 1.8s ease-in-out infinite; }
+.velocity-panel .chart-line { stroke-dasharray: 760; stroke-dashoffset: 760; animation: chart-draw 1.6s ease-out forwards, chart-breathe 5s ease-in-out 1.6s infinite; }
+.velocity-panel .chart-fill { opacity: .72; animation: fill-breathe 5s ease-in-out infinite; }
+@keyframes chart-draw { to { stroke-dashoffset: 0; } }
+@keyframes chart-breathe { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes fill-breathe { 0%, 100% { opacity: .62; } 50% { opacity: .82; } }
+@keyframes live-pulse { 0%, 100% { opacity: .8; } 50% { opacity: 1; } }
+
+@media (max-width: 900px) {
+	.attention { overflow: visible; }
+	.attention > .panel-heading { padding-inline: 18px; }
+	.attention-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	.table-head, .attention-row { min-width: 760px; }
+}
+
+@media (max-width: 720px) {
+	.attention > .panel-heading { align-items: flex-start; flex-direction: column; }
+	.queue-actions { width: 100%; justify-content: space-between; }
+	.attention-table { margin-inline: -18px; width: calc(100% + 36px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.velocity-panel .panel-heading .eyebrow::after, .velocity-panel .chart-line, .velocity-panel .chart-fill { animation: none; }
+}
 
 /* Keep dense operational views usable when the navigation and tables lose room. */
 @media (max-width: 720px) {
@@ -194,6 +223,22 @@ body { background: #f7f8fc; }
 }
 
 .chat-widget { position: fixed; right: 24px; bottom: 24px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.notification-wrap { position: relative; }
+.icon-button.open { color: var(--accent); background: var(--accent-soft); border-radius: 7px; }
+.notification-popover { position: absolute; z-index: 20; top: calc(100% + 12px); right: -8px; width: 340px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; box-shadow: 0 16px 36px rgba(15, 23, 42, .18); }
+.notification-popover::before { content: ''; position: absolute; right: 19px; top: -6px; width: 11px; height: 11px; background: var(--surface); border-left: 1px solid var(--border); border-top: 1px solid var(--border); transform: rotate(45deg); }
+.notification-head { position: relative; display: flex; justify-content: space-between; align-items: center; padding: 15px 16px 13px; border-bottom: 1px solid var(--line); color: var(--text-strong); font-size: 13px; }
+.notification-head span { color: var(--text-faint); font: 9px 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .08em; }
+.notification-list { position: relative; }
+.notification-item { display: grid; grid-template-columns: 29px 1fr 15px; gap: 10px; align-items: center; width: 100%; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--text); text-align: left; }
+.notification-item:hover { background: var(--surface-muted); }
+.notification-icon { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 7px; font: 600 13px 'DM Mono', monospace; }
+.notification-icon.pricing { background: #ede9fe; color: #7c3aed; }.notification-icon.reorder { background: #fef3c7; color: #b45309; }
+.notification-item strong, .notification-item small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.notification-item strong { color: var(--text-strong); font-size: 11px; }.notification-item small { margin-top: 4px; color: var(--text-faint); font: 9px 'DM Mono', monospace; }
+.notification-arrow { color: var(--accent); font-size: 15px; }.notification-empty { position: relative; margin: 0; padding: 22px 18px; color: var(--text-muted); font-size: 12px; line-height: 1.5; text-align: center; }
+.notification-footer { position: relative; width: 100%; padding: 12px 16px; border: 0; border-radius: 0; background: var(--surface-muted); color: var(--accent); text-align: left; font-size: 11px; }
+.notification-footer:hover { background: var(--accent-soft); }
 .chat-fab { width: 54px; height: 54px; border-radius: 50%; background: #6366f1; color: #fff; border: 0; font-size: 22px; display: grid; place-items: center; box-shadow: 0 10px 24px rgba(99, 102, 241, .4); }
 .chat-panel { width: 320px; max-width: calc(100vw - 48px); height: 420px; max-height: calc(100vh - 120px); background: #fff; border: 1px solid #e6eaf1; border-radius: 12px; box-shadow: 0 16px 40px rgba(15, 23, 42, .18); display: flex; flex-direction: column; overflow: hidden; }
 .chat-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #111827; color: #fff; font-size: 13px; }

@@ -20,7 +20,8 @@ public class LLMCommerceStrategy implements PricingStrategy {
             var direction = ChangeDirection.valueOf(node.path("direction").asText("HOLD"));
             var confidence = node.path("confidence").asDouble();
             var reasoning = node.path("reasoning").asText("").trim();
-            if (price.signum() <= 0 || price.compareTo(context.product().getCurrentPrice().multiply(BigDecimal.TEN)) > 0 || !Double.isFinite(confidence) || confidence < 0 || confidence > 1 || reasoning.isBlank()) throw new IllegalArgumentException("Invalid AI pricing response");
+            var minimumPrice = context.product().getCurrentPrice().multiply(BigDecimal.valueOf(0.10));
+            if (price.compareTo(minimumPrice) < 0 || price.compareTo(context.product().getCurrentPrice().multiply(BigDecimal.TEN)) > 0 || !Double.isFinite(confidence) || confidence < 0 || confidence > 1 || reasoning.isBlank()) throw new IllegalArgumentException("Invalid AI pricing response");
             return new PricingRecommendation(price, direction, confidence, reasoning);
         } catch (Exception exception) {
             log.warn("AI pricing unavailable; using rules fallback: {}", exception.getMessage());
@@ -57,7 +58,8 @@ public class LLMCommerceStrategy implements PricingStrategy {
         var price = new BigDecimal(node.path("recommendedPrice").asText());
         var direction = ChangeDirection.valueOf(node.path("direction").asText("HOLD"));
         var confidence = node.path("confidence").asDouble();
-        if (price.signum() <= 0 || price.compareTo(context.product().getCurrentPrice().multiply(BigDecimal.TEN)) > 0 || !Double.isFinite(confidence) || confidence < 0 || confidence > 1 || reasoning.isBlank()) throw new IllegalArgumentException("Invalid streamed AI pricing response");
+        var minimumPrice = context.product().getCurrentPrice().multiply(BigDecimal.valueOf(0.10));
+        if (price.compareTo(minimumPrice) < 0 || price.compareTo(context.product().getCurrentPrice().multiply(BigDecimal.TEN)) > 0 || !Double.isFinite(confidence) || confidence < 0 || confidence > 1 || reasoning.isBlank()) throw new IllegalArgumentException("Invalid streamed AI pricing response");
         return new PricingRecommendation(price, direction, confidence, reasoning);
     }
     static String extract(String raw) throws Exception { var mapper = new ObjectMapper(); var root = mapper.readTree(raw); if (root.has("response")) return root.get("response").asText(); if (root.has("choices")) return root.get("choices").get(0).get("message").get("content").asText(); if (root.has("candidates")) return root.get("candidates").get(0).get("content").get("parts").get(0).get("text").asText(); return raw; }

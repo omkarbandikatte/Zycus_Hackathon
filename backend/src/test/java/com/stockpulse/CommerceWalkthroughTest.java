@@ -102,6 +102,33 @@ class CommerceWalkthroughTest {
         assertThat(stream).contains("event:token", "event:suggestion", "data:");
     }
 
+    @Test
+    void rejectingPricingSuggestionRestoresActiveProductStatus() throws Exception {
+        String created = mvc.perform(post("/products/PRD-004/suggest-pricing"))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+        String suggestionId = mapper.readTree(created).get("id").asText();
+
+        mvc.perform(patch("/pricing-suggestions/{id}", suggestionId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"accept\":false}"))
+            .andExpect(status().isOk());
+
+        assertThat(products.findById("PRD-004").orElseThrow().getStatus().name()).isEqualTo("ACTIVE");
+    }
+
+    @Test
+    void repeatedManualSuggestionRequestsReusePendingSuggestion() throws Exception {
+        String first = mvc.perform(post("/products/PRD-002/suggest-reorder"))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+        String second = mvc.perform(post("/products/PRD-002/suggest-reorder"))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+
+        assertThat(mapper.readTree(second).get("id").asText()).isEqualTo(mapper.readTree(first).get("id").asText());
+    }
+
     private void awaitPendingSuggestions() throws InterruptedException {
         awaitPendingSuggestionsFor("PRD-003");
     }

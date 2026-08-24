@@ -189,12 +189,20 @@ cd backend
 mvn test
 ```
 
+On Windows, use a full JDK rather than a JRE so Maven can compile the project. If Mockito reports that Byte Buddy cannot attach, run Maven from a supported JDK installation (for example, set `JAVA_HOME` to your JDK 17 or 21 directory before running the command).
+
 The pricing stream endpoint emits `token` events for reasoning followed by a `suggestion` event. The console consumes this stream from the Suggestions view. The Products view includes category filtering and margin visibility, while Inventory includes a stock heatmap and threshold matrix.
 
 Start both services from Git Bash or WSL:
 
 ```text
 ./start.sh
+```
+
+From PowerShell, use the native launcher instead:
+
+```powershell
+./start.ps1
 ```
 
 The script loads the root `.env`, starts Spring Boot and Vite together, and stops both services when the script exits. Make sure frontend dependencies are installed once with `cd frontend && npm install` before using it.

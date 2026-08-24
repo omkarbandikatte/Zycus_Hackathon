@@ -13,6 +13,7 @@ export const simulateOrder = id => request(`/products/${id}/orders`, { method: '
 export const decidePricing = (id, accept) => request(`/pricing-suggestions/${id}`, { method: 'PATCH', body: JSON.stringify({ accept }) })
 export const decideReorder = (id, accept) => request(`/reorder-suggestions/${id}`, { method: 'PATCH', body: JSON.stringify({ accept }) })
 export const getStrategy = () => request('/settings/strategy')
+export const getSignalSettings = () => request('/settings/strategy/signals')
 export const changeStrategy = strategy => request('/settings/strategy', { method: 'PATCH', body: JSON.stringify({ strategy }) })
 export const askChat = message => request('/chat', { method: 'POST', body: JSON.stringify({ message }) })
 export async function streamPricing(id, onToken, onSuggestion) {

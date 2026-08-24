@@ -13,14 +13,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/settings/strategy")
 public class StrategyController {
     private final StrategyRegistry registry;
+    private final double demandSpikeMultiplier;
 
-    public StrategyController(StrategyRegistry registry) {
+    public StrategyController(StrategyRegistry registry, @org.springframework.beans.factory.annotation.Value("${stockpulse.demand-spike-multiplier:3}") double demandSpikeMultiplier) {
         this.registry = registry;
+        this.demandSpikeMultiplier = demandSpikeMultiplier;
     }
 
     @GetMapping
     public Map<String, String> current() {
         return Map.of("strategy", registry.active());
+    }
+
+    @GetMapping("/signals")
+    public Map<String, Double> signals() {
+        return Map.of("demandSpikeMultiplier", demandSpikeMultiplier);
     }
 
     @PatchMapping

@@ -131,4 +131,4 @@ When a product matches multiple signals, the attention table gives `OUT OF STOCK
 
 The dashboard derives its pending-review KPI from the combined pricing and reorder suggestion collections in `App.jsx`; this keeps the sidebar badge, notification badge, summary copy, and KPI card consistent with the API response.
 
-The console's ceiling features are implemented in the same React application: catalog cards support category filtering and margin display when `costPrice` is available, Inventory renders a stock heatmap alongside threshold comparisons, Product Detail renders price history, and Suggestions consumes the pricing SSE token stream before displaying the final recommendation.
+The console's available ceiling features are implemented in the same React application: catalog cards support category filtering and margin display when `costPrice` is available, Inventory renders a stock heatmap alongside threshold comparisons, Product Detail renders an illustrative signal trend, and Suggestions consumes the pricing SSE token stream before displaying the final recommendation. Persisted price and event history remain deferred until history endpoints are added.
